@@ -1,5 +1,13 @@
-torch>=2.0.0
-torchvision>=0.15.0
+## PyTorch はこのノートブックの実行には必須ではありません。
+## ネットワークや CUDA 互換性の問題でインストールに失敗する場合があるため一時的にコメントアウトしています。
+# torch>=2.0.0
+# torchvision>=0.15.0
 numpy>=1.24
 matplotlib>=3.7
 tqdm>=4.65
+
+# For this notebook (TensorFlow-based pipeline + Jupyter)
+tensorflow>=2.10
+jupyterlab>=3.0
+scikit-learn>=1.2
+seaborn>=0.12
