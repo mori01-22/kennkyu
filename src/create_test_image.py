@@ -1,9 +1,3 @@
-"""
-Create a single demo test image that looks like a dresser (rectangle) or non-dresser (circle).
-Usage:
-  python src\create_test_image.py --out ..\test_images\test1.jpg --type tansu
-  python src\create_test_image.py --out ..\test_images\test1.jpg --type not_tansu
-"""
 from PIL import Image, ImageDraw
 from pathlib import Path
 import argparse

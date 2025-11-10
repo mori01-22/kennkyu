@@ -1,14 +1,3 @@
-"""
-Simple inference utility for the dresser detector models.
-Supports: Keras native (.keras), SavedModel folder, and TFLite (.tflite).
-
-Usage (PowerShell examples later):
-  python src\infer.py --model path/to/tansu_detector.keras --image path/to/img.jpg
-  python src\infer.py --model path/to/tansu_detector.keras --dir path/to/images_dir --out results.csv
-  python src\infer.py --model path/to/tansu_detector.tflite --dir path/to/images_dir
-
-Outputs a CSV (if --out provided) and prints results to stdout.
-"""
 import argparse
 import os
 from pathlib import Path
