@@ -90,7 +90,7 @@ def predict_with_keras(model, img_arr: np.ndarray) -> float:
     return float(pred[0])
 
 
-def run_inference(model_path: str, images: List[Path], threshold: float = 0.5):
+def run_inference(model_path: str, images: List[Path], threshold: float = 0.5, tta: int = 0):
     model_path = str(model_path)
     is_tflite = model_path.lower().endswith('.tflite')
 
@@ -101,8 +101,20 @@ def run_inference(model_path: str, images: List[Path], threshold: float = 0.5):
         img_size = wrapper.input_size
         for img in images:
             arr = load_image(img, img_size)
-            out = wrapper.predict(arr)
-            prob = float(np.array(out).reshape(-1)[0])
+            # TTA: simple horizontal flip augmentation
+            if tta and tta > 1:
+                probs = []
+                for i in range(tta):
+                    if i % 2 == 0:
+                        a = arr
+                    else:
+                        a = np.flip(arr, axis=2)  # horizontal flip (batch, H, W, C) -> flip width
+                    out = wrapper.predict(a)
+                    probs.append(float(np.array(out).reshape(-1)[0]))
+                prob = float(sum(probs) / len(probs))
+            else:
+                out = wrapper.predict(arr)
+                prob = float(np.array(out).reshape(-1)[0])
             label = 'tansu' if prob >= threshold else 'not_tansu'
             results.append((str(img), prob, label))
     else:
@@ -111,7 +123,19 @@ def run_inference(model_path: str, images: List[Path], threshold: float = 0.5):
         img_size = detect_input_size_from_keras(model)
         for img in images:
             arr = load_image(img, img_size)
-            prob = predict_with_keras(model, arr)
+            if tta and tta > 1:
+                batch = []
+                for i in range(tta):
+                    if i % 2 == 0:
+                        batch.append(arr[0])
+                    else:
+                        batch.append(np.flip(arr[0], axis=1))
+                batch = np.stack(batch, axis=0)
+                preds = model.predict(batch)
+                preds = np.array(preds).reshape(-1)
+                prob = float(preds.mean())
+            else:
+                prob = predict_with_keras(model, arr)
             label = 'tansu' if prob >= threshold else 'not_tansu'
             results.append((str(img), prob, label))
 
@@ -126,6 +150,7 @@ def main():
     group.add_argument('--dir', '-d', help='Directory containing images')
     ap.add_argument('--out', '-o', help='CSV output path (optional)')
     ap.add_argument('--threshold', '-t', type=float, default=0.5, help='Threshold for binary decision (default 0.5)')
+    ap.add_argument('--tta', type=int, default=0, help='Test-time augmentation count (0 or 1 = off, >1 = number of augmentations)')
     args = ap.parse_args()
 
     model_path = args.model
@@ -150,7 +175,7 @@ def main():
             print('No images found in directory:', d)
             return
 
-    results = run_inference(model_path, images, threshold=args.threshold)
+    results = run_inference(model_path, images, threshold=args.threshold, tta=args.tta)
 
     # print results
     print('\nInference results:')
