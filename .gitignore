@@ -1,2 +1,3 @@
 .venv/
-*.keras
+logs
+*.h5
