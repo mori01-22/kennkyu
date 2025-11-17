@@ -4,8 +4,18 @@ from pathlib import Path
 from typing import List, Tuple
 import csv
 
-import numpy as np
-from PIL import Image
+try:
+    import numpy as np
+    from PIL import Image
+except ModuleNotFoundError as e:
+    raise ModuleNotFoundError(
+        "Missing required Python packages.\n"
+        "Activate your virtualenv and install requirements, for example:\n\n"
+        "  .\\.venv\\Scripts\\Activate.ps1; python -m pip install -r requirements.txt\n\n"
+        "Or install the minimal missing packages:\n"
+        "  python -m pip install numpy pillow\n\n"
+        "If you use conda, activate the environment then run equivalent installs."
+    ) from e
 
 try:
     import tensorflow as tf
